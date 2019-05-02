@@ -1,5 +1,7 @@
 // TODO: Put public facing types in this file.
 
+import 'dart:math';
+
 /// Checks if you are awesome. Spoiler: you are.
 class Awesome {
   bool get isAwesome => true;
@@ -142,7 +144,7 @@ class EDTFTime {
     } else if (parts[2][2] == 'Z') {
       // UTC time
       final shiftLevel = EDTFTime.SHIFT_UTC;
-      return EDTFTime(hour, minutes, seconds, shiftLevel, 0, 0);
+      return EDTFTime(hour, minutes, seconds, shiftLevel);
     } else {
       // Shift is added
       final shiftTime = parts[2].substring(2).split(':');
@@ -163,12 +165,51 @@ class EDTFTime {
 }
 
 class EDTFNumber {
-  int value;
-  int exp;
-  int precision;
-  String unspecMask;
-  bool approx;
-  bool uncert;
+  final int value;
+  final int exp;
+  final int precision;
+  final String unspecMask;
+  final bool localApprox;
+  final bool localUncert;
+  final bool groupApprox;
+  final bool groupUncert;
+
+  get realValue => value * pow(10, exp);
+
+  EDTFNumber(this.value, [this.exp, this.precision, this.unspecMask,
+    this.localApprox, this.localUncert, this.groupApprox, this.groupUncert
+  ]);
+
+  factory EDTFNumber._addGroup(EDTFNumber target, EDTFNumber prev) {
+    return EDTFNumber(
+        target.value,
+        target.exp,
+        target.precision,
+        target.unspecMask,
+        target.localApprox,
+        target.localUncert,
+        target.groupApprox | prev.groupApprox,
+        target.groupUncert | prev.groupUncert);
+  }
+
+  factory EDTFNumber.parse(String s) {
+    // Group 1: value with missing digits
+    // Group 3: exp
+    // Group 5: prec
+    final nums = RegExp(r'(-?[\dXu]+)([Ee](\d+))?([Sp](\d+))?').firstMatch(s);
+    final value = int.parse(nums.group(1).replaceAll(RegExp('[Xu]'), '0'));
+    final exp = nums.group(3) != null ? int.parse(nums.group(3)) : null;
+    final precision = nums.group(5) != null ? int.parse(nums.group(5)) : null;
+    final unspecMask = nums.group(1).replaceAll(RegExp('\d'), '.');
+
+    final localApprox = s.contains('~') || s.contains('%');
+    final localUncert = s.contains('?') || s.contains('%');
+    final groupApprox = s.endsWith('~') || s.endsWith('%');
+    final groupUncert = s.endsWith('?') || s.endsWith('%');
+
+    return EDTFNumber(value, exp, precision, unspecMask, localApprox,
+        localUncert, groupApprox, groupUncert);
+  }
 }
 
 const edtfMonthNames = {
