@@ -94,25 +94,38 @@ class EDTFDate extends EDTF {
   EDTFNumber day;
   EDTFTime time;
 
-  int uncertLevel;
-  int approxLevel;
-  static const LEVEL_NONE = 0;
-  static const LEVEL_YEAR = 1;
-  static const LEVEL_MONTH = 2;
-  static const LEVEL_DAY = 3;
-
-  EDTFDate(this.year, this.month, this.day, this.time, this.uncertLevel,
-      this.approxLevel);
+  EDTFDate(this.year, this.month, this.day, this.time);
   factory EDTFDate.parse(String s) {
     EDTFTime etime;
     if (s.contains('T')) {
       final time = s.substring(s.indexOf('T') + 1);
       etime = EDTFTime.parse(time);
+      s = s.substring(0, s.indexOf('T'));
     } else {
       etime = null;
     }
-    // TODO date parsing
-    return null;
+    final parts = <String>[];
+    for (final part in s.split('-')) {
+      if (parts.last.endsWith('Y')) {
+        parts.last += part;
+      } else {
+        parts.add(part);
+      }
+    }
+    EDTFNumber year, month, day;
+    if (parts.length >= 1) {
+      year = EDTFNumber.parse(parts[0]);
+    }
+    if (parts.length >= 2) {
+      month = EDTFNumber.parse(parts[1]);
+      year = EDTFNumber._addGroup(year, month);
+    }
+    if (parts.length >= 3) {
+      day = EDTFNumber.parse(parts[2]);
+      month = EDTFNumber._addGroup(month, day);
+      year = EDTFNumber._addGroup(year, day);
+    }
+    return EDTFDate(year, month, day, etime);
   }
 }
 
@@ -176,9 +189,14 @@ class EDTFNumber {
 
   get realValue => value * pow(10, exp);
 
-  EDTFNumber(this.value, [this.exp, this.precision, this.unspecMask,
-    this.localApprox, this.localUncert, this.groupApprox, this.groupUncert
-  ]);
+  EDTFNumber(this.value,
+      [this.exp,
+      this.precision,
+      this.unspecMask,
+      this.localApprox,
+      this.localUncert,
+      this.groupApprox,
+      this.groupUncert]);
 
   factory EDTFNumber._addGroup(EDTFNumber target, EDTFNumber prev) {
     return EDTFNumber(
