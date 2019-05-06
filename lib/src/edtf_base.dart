@@ -11,26 +11,39 @@ class Awesome {
 
 class EDTF {
   EDTF();
+
   factory EDTF.parse(String s) {
     if (RegExp('^[.*]\$').hasMatch(s)) {
       // OneOf
-      return null; // TODO
+      return EDTFOneOf.parse(s);
     } else if (RegExp('^{.*}\$').hasMatch(s)) {
       // Every
-      return null; // TODO
+      return EDTFEvery.parse(s); // TODO
     } else if (RegExp('/').hasMatch(s)) {
       // Interval
       return EDTFInterval.parse(s);
     } else {
       // Date
+      return EDTFDate.parse(s);
     }
-    return null;
+  }
+
+  /// Inner: in enclosed dates, interval rules are different
+  factory EDTF.parseInner(String s) {
+    if (RegExp('..').hasMatch(s)) {
+      // Interval
+      return EDTFInterval.parseInner(s);
+    } else {
+      // Date
+      return EDTFDate.parse(s);
+    }
   }
 
   String toString() {
     return super.toString();
   }
 
+  /// Inner: in enclosed dates, interval rules are different
   String toInnerString() {
     return this.toString();
   }
@@ -39,17 +52,29 @@ class EDTF {
 class EDTFSet extends EDTF {
   final List<EDTF> dates;
   EDTFSet([this.dates]);
-  factory EDTFSet.parse() {}
+  static List<EDTF> _parseDates(String s) {
+    final dates = <EDTF>[];
+    for (final elem in s.split(',')) {
+      dates.add(EDTF.parseInner(elem));
+    }
+    return dates;
+  }
 }
 
 class EDTFEvery extends EDTFSet {
   EDTFEvery(dates) : super(dates);
-  factory EDTFEvery.parse(String s) {}
+  factory EDTFEvery.parse(String s) {
+    return EDTFEvery(
+        EDTFSet._parseDates(RegExp('^{(.*)}\$').firstMatch(s).group(1)));
+  }
 }
 
 class EDTFOneOf extends EDTFSet {
   EDTFOneOf(dates) : super(dates);
-  factory EDTFOneOf.parse(String s) {}
+  factory EDTFOneOf.parse(String s) {
+    return EDTFOneOf(
+        EDTFSet._parseDates(RegExp('^[(.*)]\$').firstMatch(s).group(1)));
+  }
 }
 
 class EDTFInterval extends EDTF {
@@ -78,6 +103,27 @@ class EDTFInterval extends EDTF {
       end = null;
       openEnd = false;
     } else if (dates[1] == '..') {
+      end = null;
+      openEnd = true;
+    } else {
+      end = EDTFDate.parse(dates[1]);
+      openEnd = false;
+    }
+    return EDTFInterval(start, end, openStart, openEnd);
+  }
+  factory EDTFInterval.parseInner(String s) {
+    final dates = s.split('..');
+    EDTFDate start, end;
+    bool openStart, openEnd;
+    assert(dates.length == 2);
+    if (dates[0] == '') {
+      start = null;
+      openStart = true;
+    } else {
+      start = EDTFDate.parse(dates[0]);
+      openStart = false;
+    }
+    if (dates[1] == '') {
       end = null;
       openEnd = true;
     } else {
