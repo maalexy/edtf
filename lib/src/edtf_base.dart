@@ -18,7 +18,7 @@ class EDTF {
       return EDTFOneOf.parse(s);
     } else if (RegExp('^{.*}\$').hasMatch(s)) {
       // Every
-      return EDTFEvery.parse(s); // TODO
+      return EDTFEvery.parse(s);
     } else if (RegExp('/').hasMatch(s)) {
       // Interval
       return EDTFInterval.parse(s);
@@ -29,10 +29,10 @@ class EDTF {
   }
 
   /// Inner: in enclosed dates, interval rules are different
-  factory EDTF.parseInner(String s) {
+  factory EDTF._parseInner(String s) {
     if (RegExp('..').hasMatch(s)) {
       // Interval
-      return EDTFInterval.parseInner(s);
+      return EDTFInterval._parseInner(s);
     } else {
       // Date
       return EDTFDate.parse(s);
@@ -55,7 +55,7 @@ class EDTFSet extends EDTF {
   static List<EDTF> _parseDates(String s) {
     final dates = <EDTF>[];
     for (final elem in s.split(',')) {
-      dates.add(EDTF.parseInner(elem));
+      dates.add(EDTF._parseInner(elem));
     }
     return dates;
   }
@@ -111,7 +111,7 @@ class EDTFInterval extends EDTF {
     }
     return EDTFInterval(start, end, openStart, openEnd);
   }
-  factory EDTFInterval.parseInner(String s) {
+  factory EDTFInterval._parseInner(String s) {
     final dates = s.split('..');
     EDTFDate start, end;
     bool openStart, openEnd;
@@ -150,14 +150,8 @@ class EDTFDate extends EDTF {
     } else {
       etime = null;
     }
-    final parts = <String>[];
-    for (final part in s.split('-')) {
-      if (parts.last.endsWith('Y')) {
-        parts.last += part;
-      } else {
-        parts.add(part);
-      }
-    }
+    final partReg = RegExp('(\\?|~|%)?(Y?-?\\d{4,}|\\d+)(\\?|~|%)?');
+    final parts = partReg.allMatches(s).map((e) => e.group(0)).toList();
     EDTFNumber year, month, day;
     if (parts.length >= 1) {
       year = EDTFNumber.parse(parts[0]);
@@ -221,6 +215,41 @@ class EDTFTime {
       }
     }
   }
+
+  @override
+  String toString() {
+    String ret = '';
+    ret += _toFixedString(hour, 2);
+    ret += ':';
+    ret += _toFixedString(minutes, 2);
+    ret + ':';
+    ret += _toFixedString(seconds, 2);
+    if(shiftLevel == SHIFT_LOCAL) {
+      return ret;
+    } else if(shiftLevel == SHIFT_UTC) {
+      return ret + 'Z';
+    } else if(shiftLevel == SHIFT_HOUR) {
+      ret += _toFixedString(shiftHour, 2, plusSign: true);
+      return ret;
+    } else if(shiftLevel == SHIFT_MINUTE) {
+      ret += _toFixedString(shiftHour, 2, plusSign: true);
+      ret += _toFixedString(shiftMinute, 2);
+      return ret;
+    } else {
+      throw ArgumentError('Unexpected shiftLevel');
+    }
+  }
+}
+
+String _toFixedString(int number, int width, {bool plusSign = false}) {
+  String ret = '';
+  if(plusSign && number >= 0) {
+    ret += '+';
+  } else if (number < 0) {
+    ret += '-';
+  }
+  ret += number.abs().toString().padLeft(width, '0');
+  return ret;
 }
 
 class EDTFNumber {
