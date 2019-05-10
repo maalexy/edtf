@@ -5,14 +5,15 @@ import 'package:meta/meta.dart';
 
 /// Checks if you are awesome. Spoiler: you are.
 class Awesome {
+  /// TODO: delete this
   bool get isAwesome => true;
 }
 
-/// edtf, replace
-
+/// Abstract class for handling any kind of Extended Date/Time Format.
 abstract class Edtf {
   Edtf._();
 
+  /// Parses [s] to a subtype of Edtf based on the string
   factory Edtf.parse(String s) {
     if (RegExp('^\\[.*\\]\$').hasMatch(s)) {
       // OneOf
@@ -51,7 +52,9 @@ abstract class Edtf {
 */
 }
 
+/// An abstract class for handling cases where the date can be from a set
 abstract class EdtfSet extends Edtf {
+  /// The set of dates which can be used in the representation.
   final List<Edtf> values;
   EdtfSet._([this.values]) : super._();
 
@@ -64,29 +67,49 @@ abstract class EdtfSet extends Edtf {
   }
 }
 
+/// A class for handling cases where the edtf string represents all of the dates
+/// from a set.
 class EdtfEvery extends EdtfSet {
+  /// Constructor for directly creating an object with the given values
   EdtfEvery(List<Edtf> values) : super._(values);
   static final _regExp = RegExp('^{(.*)}\$');
+
+  /// Parse a '{...}' like string to an EdtfEvery object
   factory EdtfEvery.parse(String s) {
     return EdtfEvery(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 }
 
+/// A class for handling cases where the edtf string represents one of the dates
+/// from a set
 class EdtfOneOf extends EdtfSet {
+  /// Constructor for directly creating an object with the given values
   EdtfOneOf(List<Edtf> values) : super._(values);
+
+  /// Parses a '[...]' like string to an EdtfOneOf object
   factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^\\[(.*)\\]\$');
     return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 }
 
+/// A class for handling intervals as specified by the edtf standard.
 class EdtfInterval extends Edtf {
+  /// Start of the interval. Can be null, if it's unknown or open
   final EdtfDate start;
+  /// End of the interval. Can be null, if it's unknown or open
   final EdtfDate end;
+  /// True if the start of the interval is open,
+  /// false if it has a start or the start is unknown
   final bool openStart;
+  /// True if the end of the interval is open,
+  /// false if it has an end or the end is unknown
   final bool openEnd;
 
+  /// Creates an object with the given parameters
   EdtfInterval(this.start, this.openStart, this.end, this.openEnd) : super._();
+
+  /// Parses a '?/?' like string to an interval
   factory EdtfInterval.parse(String s) {
     final dates = s.split('/');
     EdtfDate start, end;
@@ -114,6 +137,7 @@ class EdtfInterval extends Edtf {
     }
     return EdtfInterval(start, openStart, end, openEnd);
   }
+  /// Parses a '?..?' like string to an interval
   factory EdtfInterval._parseInner(String s) {
     final dates = s.split('..');
     EdtfDate start, end;
@@ -137,13 +161,20 @@ class EdtfInterval extends Edtf {
   }
 }
 
+/// A class for handling dates according to the edtf specification.
 class EdtfDate extends Edtf {
+  /// The year part of the date with the modifiers
   final EdtfNumber year;
+  /// The month part of the date with the modifiers. Can be null, if not given
   final EdtfNumber month;
+  /// The day part of the date with the modifiers. Can be null, if not given
   final EdtfNumber day;
+  /// The time part of the date. Can be null, if not given
   final EdtfTime time;
 
+  /// Constructs a EdtfDate objects from the given parameters
   EdtfDate(this.year, [this.month, this.day, this.time]) : super._();
+  /// Parses a date according to edtf specification.
   factory EdtfDate.parse(String s) {
     EdtfTime etime;
     if (s.contains('T')) {
@@ -176,12 +207,17 @@ class EdtfDate extends Edtf {
   }
 }
 
+/// A class for handling time according to the edtf specification
 class EdtfTime {
+  /// The hour part of the time
   final int hour;
+  /// The minute part of the time
   final int minutes;
+  /// The seconds part of the time
   final int seconds;
   final int _shiftHour;
   final int _shiftMinute;
+  /// The hour part of the time shift. Can be null, if time is local
   int get shiftHour {
     switch (shiftLevel) {
       case shiftLevelUTC:
@@ -193,7 +229,7 @@ class EdtfTime {
         return null;
     }
   }
-
+  /// The minute part of the time shift. Can be null, if time is local
   int get shiftMinute {
     switch (shiftLevel) {
       case shiftLevelUTC:
@@ -205,16 +241,23 @@ class EdtfTime {
         return null;
     }
   }
-
+  /// The precision of the shift where the time is stored at. Can be
+  /// Local, UTC, Hour or Minute precision with the EdtfTime.shiftLevel* value.
   final int shiftLevel;
+  /// Constant for representing Local shift value
   static const shiftLevelLocal = 0;
+  /// Constant for representing UTC time ('Z' at the end)
   static const shiftLevelUTC = 1;
+  /// Constanf for representing hour precision shifted time
   static const shiftLevelHour = 2;
+  /// Constanf for representing minute precision shifted time
   static const shiftLevelMinute = 3;
 
+  /// Constructor for creating an object from the given values
   EdtfTime(this.hour, this.minutes, this.seconds, this.shiftLevel,
       [this._shiftHour, this._shiftMinute]);
 
+  /// Creates an EdtfTime object from a 'XX:XX:XX' + shift? like string
   factory EdtfTime.parse(String time) {
     final parts = time.split(':');
     final hour = int.parse(parts[0]);
@@ -271,6 +314,7 @@ class EdtfTime {
   }
 }
 
+/// Converts a nuber to a string with leading zeroes
 String _toFixedString(int number, int width, {bool plusSign = false}) {
   var ret = '';
   if (plusSign && number >= 0) {
@@ -282,19 +326,32 @@ String _toFixedString(int number, int width, {bool plusSign = false}) {
   return ret;
 }
 
+/// A class for handling the number-like parts of an edtf date
 class EdtfNumber {
+  /// The value of the number from string,
+  /// before shifting according to exp, and with '0' for unknown parts.
   final int value;
+  /// The exponent of the value, from the 'E' number. Can be null, if not given
   final int exp;
+  /// The significant digits in the value, from the 'S' number.
+  /// Can be null, if not given
   final int precision;
+  /// The mask of the unknown characters in the value, with '.' in place of
+  /// 'X' (or 'u')
   final String unspecMask;
+  /// True if the number has '~' or '%', so it's approximate.
   final bool localApprox;
+  /// True if the number has '?' or '%' characters, stating it is uncertain
   final bool localUncert;
+  /// True if the number is approximate because of a group qualifier.
   final bool groupApprox;
+  /// True if the number is uncertain because of a group qualifier.
   final bool groupUncert;
-  // TODO replace like modifier constructor
 
+  /// The real value of the number, shifted according to the exponent.
   get realValue => value * pow(10, exp);
 
+  // TODO replace like modifier constructor
   EdtfNumber._(
       {@required this.value,
       this.exp,
@@ -317,6 +374,7 @@ class EdtfNumber {
         groupUncert: target.groupUncert | prev.groupUncert);
   }
 
+  /// Parses the number from a string
   factory EdtfNumber.parse(String s) {
     // Group 1: value with missing digits
     // Group 3: exp
@@ -344,6 +402,7 @@ class EdtfNumber {
   }
 }
 
+/// The special values for months, according to the specification
 const edtfMonthNames = {
   21: 'Spring',
   22: 'Summer',
