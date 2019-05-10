@@ -1,6 +1,5 @@
 // TODO: Put public facing types in this file.
 
-import 'dart:html_common';
 import 'dart:math';
 import 'package:meta/meta.dart';
 
@@ -62,11 +61,6 @@ abstract class EdtfSet extends Edtf {
     }
     return dates;
   }
-
-//  @override
-//  String toString() {
-//    return 'ASD';
-//  }
 }
 
 class EdtfEvery extends EdtfSet {
@@ -159,8 +153,15 @@ class EdtfDate extends Edtf {
     } else {
       etime = null;
     }
-    final partReg = RegExp('(\\?|~|%)?(Y?-?\\d{4,}|\\d+)(\\?|~|%)?');
-    final parts = partReg.allMatches(s).map((e) => e.group(0)).toList();
+
+    final numberLike = RegExp('[\\dXu]+');
+    final parts = s.split('-'); // What if -1000-10-10?
+    if(!parts[0].contains(numberLike)) {
+      final year = parts[0] + '-' + parts[1];
+      parts.removeAt(0);
+      parts[0] = year;
+    }
+    /// TODO: get parts array with ["year", "month", "day"] strings.
     EdtfNumber year, month, day;
     if (parts.length >= 1) {
       year = EdtfNumber.parse(parts[0]);
@@ -208,7 +209,7 @@ class EdtfTime {
   }
 
   final int shiftLevel;
-  static const shiftLevelLocal = 0; // TODO shiftLocal
+  static const shiftLevelLocal = 0;
   static const shiftLevelUTC = 1;
   static const shiftLevelHour = 2;
   static const shiftLevelMinute = 3;
@@ -292,9 +293,7 @@ class EdtfNumber {
   final bool localUncert;
   final bool groupApprox;
   final bool groupUncert;
-
-  // TODO everything final
-  // TODO replace-hez hasonló
+  // TODO replace like modifier constructor
 
   get realValue => value * pow(10, exp);
 
@@ -306,7 +305,7 @@ class EdtfNumber {
       this.localApprox,
       this.localUncert,
       this.groupApprox,
-      this.groupUncert}); // TODO named optional values
+      this.groupUncert});
 
   factory EdtfNumber._addGroup(EdtfNumber target, EdtfNumber prev) {
     return EdtfNumber._(
@@ -328,7 +327,7 @@ class EdtfNumber {
     final value = int.parse(nums.group(1).replaceAll(RegExp('[Xu]'), '0'));
     final exp = nums.group(3) != null ? int.parse(nums.group(3)) : null;
     final precision = nums.group(5) != null ? int.parse(nums.group(5)) : null;
-    final unspecMask = nums.group(1).replaceAll(RegExp('\d'), '.');
+    final unspecMask = nums.group(1).replaceAll(RegExp('[Xu]'), '.');
 
     final localApprox = s.contains('~') || s.contains('%');
     final localUncert = s.contains('?') || s.contains('%');
