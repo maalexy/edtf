@@ -16,7 +16,7 @@ void main() {
       ///                      Y-12019-%05-26~T15:34:06Z
       final dateParse = Edtf.parse('Y-12019-?05-26~T15:34:06Z');
       expect(dateParse.runtimeType, EdtfDate);
-      EdtfDate date = dateParse;
+      final date = dateParse as EdtfDate;
       expect(date.year.value, -12019);
       expect(date.year.localApprox, false);
       expect(date.year.localUncert, false);
@@ -38,7 +38,7 @@ void main() {
       expect(date.time.shiftLevel, EdtfTime.shiftLevelUTC);
     });
     test('Date year parse test', () {
-      final EdtfDate year1 = Edtf.parse('1234');
+      final year1 = Edtf.parse('1234') as EdtfDate;
       assert(year1.year != null);
       assert(year1.month == null);
       assert(year1.day == null);
@@ -51,7 +51,7 @@ void main() {
       expect(year1.year.localUncert, false);
       expect(year1.year.groupApprox, false);
       expect(year1.year.groupUncert, false);
-      final EdtfDate year2 = Edtf.parse('~-20XX?');
+      final year2 = Edtf.parse('~-20XX?') as EdtfDate;
       assert(year2.year != null);
       assert(year2.month == null);
       assert(year2.day == null);
@@ -64,7 +64,7 @@ void main() {
       expect(year2.year.localUncert, true);
       expect(year2.year.groupApprox, false);
       expect(year2.year.groupUncert, true);
-      final EdtfDate year3 = Edtf.parse('-12X3E9S3%');
+      final year3 = Edtf.parse('-12X3E9S3%') as EdtfDate;
       assert(year3.year != null);
       assert(year3.month == null);
       assert(year3.day == null);
@@ -79,24 +79,24 @@ void main() {
       expect(year3.year.groupUncert, true);
     });
     test('Interval parse test', () {
-      final EdtfInterval uninterval = Edtf.parse('/');
+      final uninterval = Edtf.parse('/') as EdtfInterval;
       expect(uninterval.start, null);
       expect(uninterval.openStart, false);
       expect(uninterval.end, null);
       expect(uninterval.openEnd, false);
-      final EdtfInterval openinterval = Edtf.parse('../..');
+      final openinterval = Edtf.parse('../..') as EdtfInterval;
       expect(openinterval.start, null);
       expect(openinterval.openStart, true);
       expect(openinterval.end, null);
       expect(openinterval.openEnd, true);
-      final EdtfInterval ival = Edtf.parse('1900/2019');
+      final ival = Edtf.parse('1900/2019') as EdtfInterval;
       expect(ival.start.year.value, 1900);
       expect(ival.openStart, false);
       expect(ival.end.year.value, 2019);
       expect(ival.openEnd, false);
     });
     test('Set parse tests', () {
-      final EdtfOneOf oneOf = Edtf.parse('[1999, 2000, 2013..2017, 2019..]');
+      final oneOf = Edtf.parse('[1999, 2000, 2013..2017, 2019..]') as EdtfOneOf;
       expect(oneOf.values[0].runtimeType, EdtfDate);
       expect(oneOf.values[1].runtimeType, EdtfDate);
       expect(oneOf.values[2].runtimeType, EdtfInterval);

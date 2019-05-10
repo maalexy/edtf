@@ -65,7 +65,7 @@ abstract class EdtfSet extends Edtf {
 }
 
 class EdtfEvery extends EdtfSet {
-  EdtfEvery(values) : super._(values);
+  EdtfEvery(List<Edtf> values) : super._(values);
   static final _regExp = RegExp('^{(.*)}\$');
   factory EdtfEvery.parse(String s) {
     return EdtfEvery(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
@@ -73,7 +73,7 @@ class EdtfEvery extends EdtfSet {
 }
 
 class EdtfOneOf extends EdtfSet {
-  EdtfOneOf(values) : super._(values);
+  EdtfOneOf(List<Edtf> values) : super._(values);
   factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^\\[(.*)\\]\$');
     return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
@@ -248,11 +248,11 @@ class EdtfTime {
 
   @override
   String toString() {
-    String ret = '';
+    var ret = '';
     ret += _toFixedString(hour, 2);
     ret += ':';
     ret += _toFixedString(minutes, 2);
-    ret + ':';
+    ret += ':';
     ret += _toFixedString(seconds, 2);
     if (shiftLevel == shiftLevelLocal) {
       return ret;
@@ -272,7 +272,7 @@ class EdtfTime {
 }
 
 String _toFixedString(int number, int width, {bool plusSign = false}) {
-  String ret = '';
+  var ret = '';
   if (plusSign && number >= 0) {
     ret += '+';
   } else if (number < 0) {
@@ -345,25 +345,25 @@ class EdtfNumber {
 }
 
 const edtfMonthNames = {
-  21: "Spring",
-  22: "Summer",
-  23: "Autumn",
-  24: "Winter",
-  25: "Spring - Northern Hemisphere",
-  26: "Summer - Northern Hemisphere",
-  27: "Autumn - Northern Hemisphere",
-  28: "Winter - Northern Hemisphere",
-  29: "Spring - Southern Hemisphere",
-  30: "Summer - Southern Hemisphere",
-  31: "Autumn - Southern Hemisphere",
-  32: "Winter - Southern Hemisphere",
-  33: "Quarter 1 (3 months in duration)",
-  34: "Quarter 2 (3 months in duration)",
-  35: "Quarter 3 (3 months in duration)",
-  36: "Quarter 4 (3 months in duration)",
-  37: "Quadrimester 1 (4 months in duration)",
-  38: "Quadrimester 2 (4 months in duration)",
-  39: "Quadrimester 3 (4 months in duration)",
-  40: "Semestral 1 (6 months in duration)",
-  41: "Semestral 2 (6 months in duration)",
+  21: 'Spring',
+  22: 'Summer',
+  23: 'Autumn',
+  24: 'Winter',
+  25: 'Spring - Northern Hemisphere',
+  26: 'Summer - Northern Hemisphere',
+  27: 'Autumn - Northern Hemisphere',
+  28: 'Winter - Northern Hemisphere',
+  29: 'Spring - Southern Hemisphere',
+  30: 'Summer - Southern Hemisphere',
+  31: 'Autumn - Southern Hemisphere',
+  32: 'Winter - Southern Hemisphere',
+  33: 'Quarter 1 (3 months in duration)',
+  34: 'Quarter 2 (3 months in duration)',
+  35: 'Quarter 3 (3 months in duration)',
+  36: 'Quarter 4 (3 months in duration)',
+  37: 'Quadrimester 1 (4 months in duration)',
+  38: 'Quadrimester 2 (4 months in duration)',
+  39: 'Quadrimester 3 (4 months in duration)',
+  40: 'Semestral 1 (6 months in duration)',
+  41: 'Semestral 2 (6 months in duration)',
 };
