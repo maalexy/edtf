@@ -13,6 +13,7 @@ void main() {
       expect(awesome.isAwesome, isTrue);
     });
     test('Date test', () {
+      ///                      Y-12019-%05-06~T15:34:06Z
       final date = EDTF.parse('Y-12019-?05-06~T15:34:06Z');
       expect(date.runtimeType, EDTFDate);
       EDTFDate date2 = date;
