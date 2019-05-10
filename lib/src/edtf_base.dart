@@ -40,7 +40,7 @@ abstract class Edtf {
       return EdtfDate.parse(s);
     }
   }
-/*
+
   @override
   String toString() {
     return super.toString();
@@ -49,7 +49,6 @@ abstract class Edtf {
   String _toInnerString() {
     return toString();
   }
-*/
 }
 
 /// An abstract class for handling cases where the date can be from a set
@@ -65,6 +64,16 @@ abstract class EdtfSet extends Edtf {
     }
     return dates;
   }
+
+  @override
+  String toString() {
+    var ret = '';
+    for (final edtf in values) {
+      ret += edtf._toInnerString() + ',';
+    }
+    ret = ret.substring(0, ret.length - 1);
+    return ret;
+  }
 }
 
 /// A class for handling cases where the edtf string represents all of the dates
@@ -78,6 +87,11 @@ class EdtfEvery extends EdtfSet {
   factory EdtfEvery.parse(String s) {
     return EdtfEvery(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
+
+  @override
+  String toString() {
+    return '{' + super.toString() + '}';
+  }
 }
 
 /// A class for handling cases where the edtf string represents one of the dates
@@ -90,6 +104,11 @@ class EdtfOneOf extends EdtfSet {
   factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^\\[(.*)\\]\$');
     return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
+  }
+
+  @override
+  String toString() {
+    return '[' + super.toString() + ']';
   }
 }
 
@@ -163,6 +182,38 @@ class EdtfInterval extends Edtf {
     }
     return EdtfInterval(start, openStart, end, openEnd);
   }
+
+  @override
+  String toString() {
+    var ret = '';
+    if (openStart) {
+      ret += '..';
+    }
+    if (start != null) {
+      ret += start.toString();
+    }
+    ret += '/';
+    if (end != null) {
+      ret += end.toString();
+    }
+    if (openEnd) {
+      ret += '..';
+    }
+    return ret;
+  }
+
+  @override
+  String _toInnerString() {
+    var ret = '';
+    if (start != null) {
+      ret += start.toString();
+    }
+    ret += '..';
+    if (end != null) {
+      ret += end.toString();
+    }
+    return ret;
+  }
 }
 
 /// A class for handling dates according to the edtf specification.
@@ -212,6 +263,21 @@ class EdtfDate extends Edtf {
       year = EdtfNumber._addGroup(year, day);
     }
     return EdtfDate(year, month, day, etime);
+  }
+
+  @override
+  String toString() {
+    var ret = year.toString();
+    if (month != null) {
+      ret += '-' + month.toString();
+    }
+    if (day != null) {
+      ret += '-' + day.toString();
+    }
+    if (time != null) {
+      ret += 'T' + time.toString();
+    }
+    return ret;
   }
 }
 
@@ -432,11 +498,11 @@ class EdtfNumber {
     if (exp != null) ret += 'E' + exp.toString();
     if (significance != null) ret += 'S' + significance.toString();
     final groupchar = groupApprox ? groupUncert ? '%' : '~' : '?';
-    if((localApprox && groupApprox) || (localUncert && groupUncert)) {
+    if ((localApprox && groupApprox) || (localUncert && groupUncert)) {
       ret += groupchar;
     }
     final localchar = localApprox ? localUncert ? '%' : '~' : '?';
-    if((localApprox && !groupApprox) || (localUncert && !groupUncert)) {
+    if ((localApprox && !groupApprox) || (localUncert && !groupUncert)) {
       ret = localchar + ret;
     }
     return ret;
