@@ -86,14 +86,27 @@ void main() {
     expect(uninterval.end, null);
     expect(uninterval.openEnd, false);
     final EdtfInterval openinterval = Edtf.parse('../..');
-    expect(uninterval.start, null);
-    expect(uninterval.openStart, true);
-    expect(uninterval.end, null);
-    expect(uninterval.openEnd, true);
+    expect(openinterval.start, null);
+    expect(openinterval.openStart, true);
+    expect(openinterval.end, null);
+    expect(openinterval.openEnd, true);
     final EdtfInterval ival = Edtf.parse('1900/2019');
     expect(ival.start.year.value, 1900);
     expect(ival.openStart, false);
     expect(ival.end.year.value, 2019);
     expect(ival.openEnd, false);
+  });
+  test('Set parse tests', () {
+    final EdtfOneOf oneOf = Edtf.parse('[1999, 2000, 2013..2017, 2019..]');
+    expect(oneOf.values[0].runtimeType, EdtfDate);
+    expect(oneOf.values[1].runtimeType, EdtfDate);
+    expect(oneOf.values[2].runtimeType, EdtfInterval);
+    expect(oneOf.values[3].runtimeType, EdtfInterval);
+    expect((oneOf.values[0] as EdtfDate).year.value, 1999);
+    expect((oneOf.values[1] as EdtfDate).year.value, 2000);
+    expect((oneOf.values[2] as EdtfInterval).start.year.value, 2013);
+    expect((oneOf.values[2] as EdtfInterval).end.year.value, 2017);
+    expect((oneOf.values[3] as EdtfInterval).start.year.value, 2019);
+    expect((oneOf.values[3] as EdtfInterval).openEnd, true);
   });
 }
