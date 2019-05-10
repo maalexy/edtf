@@ -11,33 +11,33 @@ class Awesome {
 
 /// edtf, replace
 
-abstract class EDTF {
-  EDTF._();
+abstract class Edtf {
+  Edtf._();
 
-  factory EDTF.parse(String s) {
+  factory Edtf.parse(String s) {
     if (RegExp('^[.*]\$').hasMatch(s)) {
       // OneOf
-      return EDTFOneOf.parse(s);
+      return EdtfOneOf.parse(s);
     } else if (RegExp('^{.*}\$').hasMatch(s)) {
       // Every
-      return EDTFEvery.parse(s);
+      return EdtfEvery.parse(s);
     } else if (RegExp('/').hasMatch(s)) {
       // Interval
-      return EDTFInterval.parse(s);
+      return EdtfInterval.parse(s);
     } else {
       // Date
-      return EDTFDate.parse(s);
+      return EdtfDate.parse(s);
     }
   }
 
   /// Inner: in enclosed dates, interval rules are different
-  factory EDTF._parseInner(String s) {
+  factory Edtf._parseInner(String s) {
     if (RegExp('..').hasMatch(s)) {
       // Interval
-      return EDTFInterval._parseInner(s);
+      return EdtfInterval._parseInner(s);
     } else {
       // Date
-      return EDTFDate.parse(s);
+      return EdtfDate.parse(s);
     }
   }
 
@@ -51,51 +51,51 @@ abstract class EDTF {
   }
 }
 
-abstract class EDTFSet extends EDTF {
-  final List<EDTF> values;
-  EDTFSet._([this.values]) : super._();
+abstract class EdtfSet extends Edtf {
+  final List<Edtf> values;
+  EdtfSet._([this.values]) : super._();
 
-  static List<EDTF> _parseDates(String s) {
-    final dates = <EDTF>[];
+  static List<Edtf> _parseDates(String s) {
+    final dates = <Edtf>[];
     for (final elem in s.split(',')) {
-      dates.add(EDTF._parseInner(elem));
+      dates.add(Edtf._parseInner(elem));
     }
     return dates;
   }
 
-  @override
-  String toString() {
-    return 'ASD';
-  }
+//  @override
+//  String toString() {
+//    return 'ASD';
+//  }
 }
 
-class EDTFEvery extends EDTFSet {
-  EDTFEvery(values) : super._(values);
+class EdtfEvery extends EdtfSet {
+  EdtfEvery(values) : super._(values);
   static final _regExp = RegExp('^{(.*)}\$');
-  factory EDTFEvery.parse(String s) {
-    return EDTFEvery(EDTFSet._parseDates(_regExp.firstMatch(s).group(1)));
+  factory EdtfEvery.parse(String s) {
+    return EdtfEvery(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 }
 
-class EDTFOneOf extends EDTFSet {
-  EDTFOneOf(values) : super._(values);
-  factory EDTFOneOf.parse(String s) {
+class EdtfOneOf extends EdtfSet {
+  EdtfOneOf(values) : super._(values);
+  factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^[(.*)]\$');
-    return EDTFOneOf(
-        EDTFSet._parseDates(_regExp.firstMatch(s).group(1)));
+    return EdtfOneOf(
+        EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 }
 
-class EDTFInterval extends EDTF {
-  final EDTFDate start;
-  final EDTFDate end;
+class EdtfInterval extends Edtf {
+  final EdtfDate start;
+  final EdtfDate end;
   final bool openStart;
   final bool openEnd;
 
-  EDTFInterval(this.start, this.end, this.openStart, this.openEnd) : super._();
-  factory EDTFInterval.parse(String s) {
+  EdtfInterval(this.start, this.openStart, this.end, this.openEnd) : super._();
+  factory EdtfInterval.parse(String s) {
     final dates = s.split('/');
-    EDTFDate start, end;
+    EdtfDate start, end;
     bool openStart, openEnd;
     assert(dates.length == 2);
     if (dates[0] == '') {
@@ -105,7 +105,7 @@ class EDTFInterval extends EDTF {
       start = null;
       openStart = true;
     } else {
-      start = EDTFDate.parse(dates[0]);
+      start = EdtfDate.parse(dates[0]);
       openStart = false;
     }
     if (dates[1] == '') {
@@ -115,70 +115,70 @@ class EDTFInterval extends EDTF {
       end = null;
       openEnd = true;
     } else {
-      end = EDTFDate.parse(dates[1]);
+      end = EdtfDate.parse(dates[1]);
       openEnd = false;
     }
-    return EDTFInterval(start, end, openStart, openEnd);
+    return EdtfInterval(start, openStart, end, openEnd);
   }
-  factory EDTFInterval._parseInner(String s) {
+  factory EdtfInterval._parseInner(String s) {
     final dates = s.split('..');
-    EDTFDate start, end;
+    EdtfDate start, end;
     bool openStart, openEnd;
     assert(dates.length == 2);
     if (dates[0] == '') {
       start = null;
       openStart = true;
     } else {
-      start = EDTFDate.parse(dates[0]);
+      start = EdtfDate.parse(dates[0]);
       openStart = false;
     }
     if (dates[1] == '') {
       end = null;
       openEnd = true;
     } else {
-      end = EDTFDate.parse(dates[1]);
+      end = EdtfDate.parse(dates[1]);
       openEnd = false;
     }
-    return EDTFInterval(start, end, openStart, openEnd);
+    return EdtfInterval(start, openStart, end, openEnd);
   }
 }
 
-class EDTFDate extends EDTF {
-  final EDTFNumber year;
-  final EDTFNumber month;
-  final EDTFNumber day;
-  final EDTFTime time;
+class EdtfDate extends Edtf {
+  final EdtfNumber year;
+  final EdtfNumber month;
+  final EdtfNumber day;
+  final EdtfTime time;
 
-  EDTFDate(this.year, this.month, this.day, this.time) : super._();
-  factory EDTFDate.parse(String s) {
-    EDTFTime etime;
+  EdtfDate(this.year, [this.month, this.day, this.time]) : super._();
+  factory EdtfDate.parse(String s) {
+    EdtfTime etime;
     if (s.contains('T')) {
       final time = s.substring(s.indexOf('T') + 1);
-      etime = EDTFTime.parse(time);
+      etime = EdtfTime.parse(time);
       s = s.substring(0, s.indexOf('T'));
     } else {
       etime = null;
     }
     final partReg = RegExp('(\\?|~|%)?(Y?-?\\d{4,}|\\d+)(\\?|~|%)?');
     final parts = partReg.allMatches(s).map((e) => e.group(0)).toList();
-    EDTFNumber year, month, day;
+    EdtfNumber year, month, day;
     if (parts.length >= 1) {
-      year = EDTFNumber.parse(parts[0]);
+      year = EdtfNumber.parse(parts[0]);
     }
     if (parts.length >= 2) {
-      month = EDTFNumber.parse(parts[1]);
-      year = EDTFNumber._addGroup(year, month);
+      month = EdtfNumber.parse(parts[1]);
+      year = EdtfNumber._addGroup(year, month);
     }
     if (parts.length >= 3) {
-      day = EDTFNumber.parse(parts[2]);
-      month = EDTFNumber._addGroup(month, day);
-      year = EDTFNumber._addGroup(year, day);
+      day = EdtfNumber.parse(parts[2]);
+      month = EdtfNumber._addGroup(month, day);
+      year = EdtfNumber._addGroup(year, day);
     }
-    return EDTFDate(year, month, day, etime);
+    return EdtfDate(year, month, day, etime);
   }
 }
 
-class EDTFTime {
+class EdtfTime {
   final int hour;
   final int minutes;
   final int seconds;
@@ -186,62 +186,62 @@ class EDTFTime {
   final int _shiftMinute;
   int get shiftHour {
     switch(shiftLevel) {
-      case SHIFT_UTC:
+      case shiftLevelUTC:
         return 0;
-      case SHIFT_HOUR:
-      case SHIFT_MINUTE:
+      case shiftLevelHour:
+      case shiftLevelMinute:
         return _shiftHour;
-      default: // shiftLevel == SHIFT_LOCAL
+      default: // shiftLevel == shiftLevelLocal or error
         return null;
     }
   }
   int get shiftMinute {
     switch(shiftLevel) {
-      case SHIFT_UTC:
-      case SHIFT_HOUR:
+      case shiftLevelUTC:
+      case shiftLevelHour:
         return 0;
-      case SHIFT_MINUTE:
+      case shiftLevelMinute:
         return _shiftMinute;
-      default: // shiftLevel == SHIFT_LOCAL
+      default: // shiftLevel == shiftLevelLocal or error
         return null;
     }
   }
 
   final int shiftLevel;
-  static const SHIFT_LOCAL = 0; // TODO shiftLocal
-  static const SHIFT_UTC = 1;
-  static const SHIFT_HOUR = 2;
-  static const SHIFT_MINUTE = 3;
+  static const shiftLevelLocal = 0; // TODO shiftLocal
+  static const shiftLevelUTC = 1;
+  static const shiftLevelHour = 2;
+  static const shiftLevelMinute = 3;
 
-  EDTFTime(this.hour, this.minutes, this.seconds, this.shiftLevel,
+  EdtfTime(this.hour, this.minutes, this.seconds, this.shiftLevel,
       [this._shiftHour, this._shiftMinute]);
 
-  factory EDTFTime.parse(String time) {
+  factory EdtfTime.parse(String time) {
     final parts = time.split(':');
     final hour = int.parse(parts[0]);
     final minutes = int.parse(parts[1]);
     final seconds = int.parse(parts[2].substring(0, 2));
     if (parts[2].length <= 2) {
       // Local time
-      final shiftLevel = EDTFTime.SHIFT_LOCAL;
-      return EDTFTime(hour, minutes, seconds, shiftLevel);
+      final shiftLevel = EdtfTime.shiftLevelLocal;
+      return EdtfTime(hour, minutes, seconds, shiftLevel);
     } else if (parts[2][2] == 'Z') {
       // UTC time
-      final shiftLevel = EDTFTime.SHIFT_UTC;
-      return EDTFTime(hour, minutes, seconds, shiftLevel);
+      final shiftLevel = EdtfTime.shiftLevelUTC;
+      return EdtfTime(hour, minutes, seconds, shiftLevel);
     } else {
       // Shift is added
       final shiftTime = parts[2].substring(2).split(':');
       final shiftHour = int.parse(shiftTime[0]);
       if (shiftTime.length == 1) {
         // Has shiftHour precision
-        final shiftLevel = EDTFTime.SHIFT_HOUR;
-        return EDTFTime(hour, minutes, seconds, shiftLevel, shiftHour);
+        final shiftLevel = EdtfTime.shiftLevelHour;
+        return EdtfTime(hour, minutes, seconds, shiftLevel, shiftHour);
       } else {
         // Has shiftHour:shiftMinute format
         final shiftMinute = int.parse(shiftTime[1]);
-        final shiftLevel = EDTFTime.SHIFT_MINUTE;
-        return EDTFTime(
+        final shiftLevel = EdtfTime.shiftLevelMinute;
+        return EdtfTime(
             hour, minutes, seconds, shiftLevel, shiftHour, shiftMinute);
       }
     }
@@ -255,14 +255,14 @@ class EDTFTime {
     ret += _toFixedString(minutes, 2);
     ret + ':';
     ret += _toFixedString(seconds, 2);
-    if (shiftLevel == SHIFT_LOCAL) {
+    if (shiftLevel == shiftLevelLocal) {
       return ret;
-    } else if (shiftLevel == SHIFT_UTC) {
+    } else if (shiftLevel == shiftLevelUTC) {
       return ret + 'Z';
-    } else if (shiftLevel == SHIFT_HOUR) {
+    } else if (shiftLevel == shiftLevelHour) {
       ret += _toFixedString(_shiftHour, 2, plusSign: true);
       return ret;
-    } else if (shiftLevel == SHIFT_MINUTE) {
+    } else if (shiftLevel == shiftLevelMinute) {
       ret += _toFixedString(_shiftHour, 2, plusSign: true);
       ret += _toFixedString(_shiftMinute, 2);
       return ret;
@@ -283,7 +283,7 @@ String _toFixedString(int number, int width, {bool plusSign = false}) {
   return ret;
 }
 
-class EDTFNumber {
+class EdtfNumber {
   final int value;
   final int exp;
   final int precision;
@@ -298,7 +298,7 @@ class EDTFNumber {
 
   get realValue => value * pow(10, exp);
 
-  EDTFNumber._(
+  EdtfNumber._(
       {@required this.value,
       this.exp,
       this.precision,
@@ -308,8 +308,8 @@ class EDTFNumber {
       this.groupApprox,
       this.groupUncert}); // TODO named optional values
 
-  factory EDTFNumber._addGroup(EDTFNumber target, EDTFNumber prev) {
-    return EDTFNumber._(
+  factory EdtfNumber._addGroup(EdtfNumber target, EdtfNumber prev) {
+    return EdtfNumber._(
         value: target.value,
         exp: target.exp,
         precision: target.precision,
@@ -320,7 +320,7 @@ class EDTFNumber {
         groupUncert: target.groupUncert | prev.groupUncert);
   }
 
-  factory EDTFNumber.parse(String s) {
+  factory EdtfNumber.parse(String s) {
     // Group 1: value with missing digits
     // Group 3: exp
     // Group 5: prec
@@ -335,7 +335,7 @@ class EDTFNumber {
     final groupApprox = s.endsWith('~') || s.endsWith('%');
     final groupUncert = s.endsWith('?') || s.endsWith('%');
 
-    return EDTFNumber._(
+    return EdtfNumber._(
         value: value,
         exp: exp,
         precision: precision,
