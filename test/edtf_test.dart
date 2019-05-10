@@ -38,7 +38,7 @@ void main() {
       expect(date.time.shiftLevel, EdtfTime.shiftLevelUTC);
     });
     test('Date year parse test', () {
-      final  EdtfDate year1 = Edtf.parse('1234');
+      final EdtfDate year1 = Edtf.parse('1234');
       assert(year1.year != null);
       assert(year1.month == null);
       assert(year1.day == null);
@@ -51,7 +51,7 @@ void main() {
       expect(year1.year.localUncert, false);
       expect(year1.year.groupApprox, false);
       expect(year1.year.groupUncert, false);
-      final  EdtfDate year2 = Edtf.parse('~-20XX?');
+      final EdtfDate year2 = Edtf.parse('~-20XX?');
       assert(year2.year != null);
       assert(year2.month == null);
       assert(year2.day == null);
@@ -64,7 +64,7 @@ void main() {
       expect(year2.year.localUncert, true);
       expect(year2.year.groupApprox, false);
       expect(year2.year.groupUncert, true);
-      final  EdtfDate year3 = Edtf.parse('-12X3E9S3%');
+      final EdtfDate year3 = Edtf.parse('-12X3E9S3%');
       assert(year3.year != null);
       assert(year3.month == null);
       assert(year3.day == null);
