@@ -76,8 +76,7 @@ class EdtfOneOf extends EdtfSet {
   EdtfOneOf(values) : super._(values);
   factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^[(.*)]\$');
-    return EdtfOneOf(
-        EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
+    return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 }
 
@@ -157,7 +156,7 @@ class EdtfDate extends Edtf {
 
     final numberLike = RegExp('[\\dXu]+');
     final parts = s.split('-'); // What if -1000-10-10?
-    if(!parts[0].contains(numberLike)) {
+    if (!parts[0].contains(numberLike)) {
       final year = parts[0] + '-' + parts[1];
       parts.removeAt(0);
       parts[0] = year;
@@ -184,7 +183,7 @@ class EdtfTime {
   final int _shiftHour;
   final int _shiftMinute;
   int get shiftHour {
-    switch(shiftLevel) {
+    switch (shiftLevel) {
       case shiftLevelUTC:
         return 0;
       case shiftLevelHour:
@@ -194,8 +193,9 @@ class EdtfTime {
         return null;
     }
   }
+
   int get shiftMinute {
-    switch(shiftLevel) {
+    switch (shiftLevel) {
       case shiftLevelUTC:
       case shiftLevelHour:
         return 0;
