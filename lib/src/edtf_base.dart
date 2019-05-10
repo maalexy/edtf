@@ -14,7 +14,7 @@ abstract class Edtf {
   Edtf._();
 
   factory Edtf.parse(String s) {
-    if (RegExp('^[.*]\$').hasMatch(s)) {
+    if (RegExp('^\\[.*\\]\$').hasMatch(s)) {
       // OneOf
       return EdtfOneOf.parse(s);
     } else if (RegExp('^{.*}\$').hasMatch(s)) {
@@ -31,7 +31,7 @@ abstract class Edtf {
 
   /// Inner: in enclosed dates, interval rules are different
   factory Edtf._parseInner(String s) {
-    if (RegExp('..').hasMatch(s)) {
+    if (RegExp('\\.\\.').hasMatch(s)) {
       // Interval
       return EdtfInterval._parseInner(s);
     } else {
@@ -75,7 +75,7 @@ class EdtfEvery extends EdtfSet {
 class EdtfOneOf extends EdtfSet {
   EdtfOneOf(values) : super._(values);
   factory EdtfOneOf.parse(String s) {
-    final _regExp = RegExp('^[(.*)]\$');
+    final _regExp = RegExp('^\\[(.*)\\]\$');
     return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 }
