@@ -45,7 +45,7 @@ void main() {
       assert(year1.time == null);
       expect(year1.year.value, 1234);
       expect(year1.year.exp, null);
-      expect(year1.year.precision, null);
+      expect(year1.year.significance, null);
       expect(year1.year.unspecMask, '1234');
       expect(year1.year.localApprox, false);
       expect(year1.year.localUncert, false);
@@ -58,7 +58,7 @@ void main() {
       assert(year2.time == null);
       expect(year2.year.value, -2000);
       expect(year2.year.exp, null);
-      expect(year2.year.precision, null);
+      expect(year2.year.significance, null);
       expect(year2.year.unspecMask, '-20..');
       expect(year2.year.localApprox, true);
       expect(year2.year.localUncert, true);
@@ -71,7 +71,7 @@ void main() {
       assert(year3.time == null);
       expect(year3.year.value, -1203);
       expect(year3.year.exp, 9);
-      expect(year3.year.precision, 3);
+      expect(year3.year.significance, 3);
       expect(year3.year.unspecMask, '-12.3');
       expect(year3.year.localApprox, true);
       expect(year3.year.localUncert, true);

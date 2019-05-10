@@ -354,7 +354,7 @@ class EdtfNumber {
 
   /// The significant digits in the value, from the 'S' number.
   /// Can be null, if not given
-  final int precision;
+  final int significance;
 
   /// The mask of the unknown characters in the value, with '.' in place of
   /// 'X' (or 'u')
@@ -379,7 +379,7 @@ class EdtfNumber {
   EdtfNumber._(
       {@required this.value,
       this.exp,
-      this.precision,
+      this.significance,
       this.unspecMask,
       this.localApprox,
       this.localUncert,
@@ -390,7 +390,7 @@ class EdtfNumber {
     return EdtfNumber._(
         value: target.value,
         exp: target.exp,
-        precision: target.precision,
+        significance: target.significance,
         unspecMask: target.unspecMask,
         localApprox: target.localApprox,
         localUncert: target.localUncert,
@@ -417,12 +417,29 @@ class EdtfNumber {
     return EdtfNumber._(
         value: value,
         exp: exp,
-        precision: precision,
+        significance: precision,
         unspecMask: unspecMask,
         localApprox: localApprox,
         localUncert: localUncert,
         groupApprox: groupApprox,
         groupUncert: groupUncert);
+  }
+  @override
+  String toString() {
+    var ret = '';
+    if (value < -9999 || 9999 < value) ret += 'Y';
+    ret += unspecMask.replaceAll('.', 'X');
+    if (exp != null) ret += 'E' + exp.toString();
+    if (significance != null) ret += 'S' + significance.toString();
+    final groupchar = groupApprox ? groupUncert ? '%' : '~' : '?';
+    if((localApprox && groupApprox) || (localUncert && groupUncert)) {
+      ret += groupchar;
+    }
+    final localchar = localApprox ? localUncert ? '%' : '~' : '?';
+    if((localApprox && !groupApprox) || (localUncert && !groupUncert)) {
+      ret = localchar + ret;
+    }
+    return ret;
   }
 }
 
