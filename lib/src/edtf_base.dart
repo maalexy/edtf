@@ -39,7 +39,7 @@ abstract class Edtf {
       return EdtfDate.parse(s);
     }
   }
-
+/*
   @override
   String toString() {
     return super.toString();
@@ -48,6 +48,7 @@ abstract class Edtf {
   String _toInnerString() {
     return toString();
   }
+*/
 }
 
 abstract class EdtfSet extends Edtf {
@@ -161,11 +162,8 @@ class EdtfDate extends Edtf {
       parts.removeAt(0);
       parts[0] = year;
     }
-    /// TODO: get parts array with ["year", "month", "day"] strings.
     EdtfNumber year, month, day;
-    if (parts.length >= 1) {
-      year = EdtfNumber.parse(parts[0]);
-    }
+    year = EdtfNumber.parse(parts[0]);
     if (parts.length >= 2) {
       month = EdtfNumber.parse(parts[1]);
       year = EdtfNumber._addGroup(year, month);
