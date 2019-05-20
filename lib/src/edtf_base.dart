@@ -1,13 +1,5 @@
-// TODO: Put public facing types in this file.
-
 import 'dart:math';
 import 'package:meta/meta.dart';
-
-/// Checks if you are awesome. Spoiler: you are.
-class Awesome {
-  /// TODO: delete this
-  bool get isAwesome => true;
-}
 
 /// Abstract class for handling any kind of Extended Date/Time Format.
 abstract class Edtf {
