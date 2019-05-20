@@ -443,9 +443,9 @@ class EdtfNumber {
 
   /// True if the number is an approximation
   bool get approx => localApprox | groupApprox;
+
   /// True if the number is uncertain
   bool get uncert => localUncert | groupUncert;
-
 
   // TODO replace like modifier constructor
   EdtfNumber._(
