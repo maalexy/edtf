@@ -40,7 +40,7 @@ abstract class Edtf {
       return EdtfDate.parse(s);
     }
   }
-/*
+
   @override
   String toString() {
     return super.toString();
@@ -49,7 +49,6 @@ abstract class Edtf {
   String _toInnerString() {
     return toString();
   }
-*/
 }
 
 /// An abstract class for handling cases where the date can be from a set
@@ -65,6 +64,16 @@ abstract class EdtfSet extends Edtf {
     }
     return dates;
   }
+
+  @override
+  String toString() {
+    var ret = '';
+    for (final edtf in values) {
+      ret += edtf._toInnerString() + ',';
+    }
+    ret = ret.substring(0, ret.length - 1);
+    return ret;
+  }
 }
 
 /// A class for handling cases where the edtf string represents all of the dates
@@ -78,6 +87,11 @@ class EdtfEvery extends EdtfSet {
   factory EdtfEvery.parse(String s) {
     return EdtfEvery(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
+
+  @override
+  String toString() {
+    return '{' + super.toString() + '}';
+  }
 }
 
 /// A class for handling cases where the edtf string represents one of the dates
@@ -90,6 +104,11 @@ class EdtfOneOf extends EdtfSet {
   factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^\\[(.*)\\]\$');
     return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
+  }
+
+  @override
+  String toString() {
+    return '[' + super.toString() + ']';
   }
 }
 
@@ -163,6 +182,38 @@ class EdtfInterval extends Edtf {
     }
     return EdtfInterval(start, openStart, end, openEnd);
   }
+
+  @override
+  String toString() {
+    var ret = '';
+    if (openStart) {
+      ret += '..';
+    }
+    if (start != null) {
+      ret += start.toString();
+    }
+    ret += '/';
+    if (end != null) {
+      ret += end.toString();
+    }
+    if (openEnd) {
+      ret += '..';
+    }
+    return ret;
+  }
+
+  @override
+  String _toInnerString() {
+    var ret = '';
+    if (start != null) {
+      ret += start.toString();
+    }
+    ret += '..';
+    if (end != null) {
+      ret += end.toString();
+    }
+    return ret;
+  }
 }
 
 /// A class for handling dates according to the edtf specification.
@@ -212,6 +263,21 @@ class EdtfDate extends Edtf {
       year = EdtfNumber._addGroup(year, day);
     }
     return EdtfDate(year, month, day, etime);
+  }
+
+  @override
+  String toString() {
+    var ret = year.toString();
+    if (month != null) {
+      ret += '-' + month.toString();
+    }
+    if (day != null) {
+      ret += '-' + day.toString();
+    }
+    if (time != null) {
+      ret += 'T' + time.toString();
+    }
+    return ret;
   }
 }
 
@@ -290,15 +356,14 @@ class EdtfTime {
       return EdtfTime(hour, minutes, seconds, shiftLevel);
     } else {
       // Shift is added
-      final shiftTime = parts[2].substring(2).split(':');
-      final shiftHour = int.parse(shiftTime[0]);
-      if (shiftTime.length == 1) {
+      final shiftHour = int.parse(parts[2].substring(2));
+      if (parts.length <= 3) {
         // Has shiftHour precision
         final shiftLevel = EdtfTime.shiftLevelHour;
         return EdtfTime(hour, minutes, seconds, shiftLevel, shiftHour);
       } else {
         // Has shiftHour:shiftMinute format
-        final shiftMinute = int.parse(shiftTime[1]);
+        final shiftMinute = int.parse(parts[3]);
         final shiftLevel = EdtfTime.shiftLevelMinute;
         return EdtfTime(
             hour, minutes, seconds, shiftLevel, shiftHour, shiftMinute);
@@ -323,6 +388,7 @@ class EdtfTime {
       return ret;
     } else if (shiftLevel == shiftLevelMinute) {
       ret += _toFixedString(_shiftHour, 2, plusSign: true);
+      ret += ':';
       ret += _toFixedString(_shiftMinute, 2);
       return ret;
     } else {
@@ -354,7 +420,7 @@ class EdtfNumber {
 
   /// The significant digits in the value, from the 'S' number.
   /// Can be null, if not given
-  final int precision;
+  final int significance;
 
   /// The mask of the unknown characters in the value, with '.' in place of
   /// 'X' (or 'u')
@@ -366,20 +432,26 @@ class EdtfNumber {
   /// True if the number has '?' or '%' characters, stating it is uncertain
   final bool localUncert;
 
-  /// True if the number is approximate because of a group qualifier.
+  /// True if the number is approximate because of a group qualifier
   final bool groupApprox;
 
-  /// True if the number is uncertain because of a group qualifier.
+  /// True if the number is uncertain because of a group qualifier
   final bool groupUncert;
 
-  /// The real value of the number, shifted according to the exponent.
-  get realValue => value * pow(10, exp);
+  /// The real value of the number, shifted according to the exponent
+  int get realValue => value * pow(10, exp).toInt();
+
+  /// True if the number is an approximation
+  bool get approx => localApprox | groupApprox;
+
+  /// True if the number is uncertain
+  bool get uncert => localUncert | groupUncert;
 
   // TODO replace like modifier constructor
   EdtfNumber._(
       {@required this.value,
       this.exp,
-      this.precision,
+      this.significance,
       this.unspecMask,
       this.localApprox,
       this.localUncert,
@@ -390,7 +462,7 @@ class EdtfNumber {
     return EdtfNumber._(
         value: target.value,
         exp: target.exp,
-        precision: target.precision,
+        significance: target.significance,
         unspecMask: target.unspecMask,
         localApprox: target.localApprox,
         localUncert: target.localUncert,
@@ -417,12 +489,29 @@ class EdtfNumber {
     return EdtfNumber._(
         value: value,
         exp: exp,
-        precision: precision,
+        significance: precision,
         unspecMask: unspecMask,
         localApprox: localApprox,
         localUncert: localUncert,
         groupApprox: groupApprox,
         groupUncert: groupUncert);
+  }
+  @override
+  String toString() {
+    var ret = '';
+    if (value < -9999 || 9999 < value || exp != null) ret += 'Y';
+    ret += unspecMask.replaceAll('.', 'X');
+    if (exp != null) ret += 'E' + exp.toString();
+    if (significance != null) ret += 'S' + significance.toString();
+    final groupChar = groupApprox ? groupUncert ? '%' : '~' : '?';
+    if ((localApprox && groupApprox) || (localUncert && groupUncert)) {
+      ret += groupChar;
+    }
+    final localChar = localApprox ? localUncert ? '%' : '~' : '?';
+    if ((localApprox && !groupApprox) || (localUncert && !groupUncert)) {
+      ret = localChar + ret;
+    }
+    return ret;
   }
 }
 
