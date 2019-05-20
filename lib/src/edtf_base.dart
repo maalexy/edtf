@@ -356,15 +356,14 @@ class EdtfTime {
       return EdtfTime(hour, minutes, seconds, shiftLevel);
     } else {
       // Shift is added
-      final shiftTime = parts[2].substring(2).split(':');
-      final shiftHour = int.parse(shiftTime[0]);
-      if (shiftTime.length == 1) {
+      final shiftHour = int.parse(parts[2].substring(2));
+      if (parts.length <= 3) {
         // Has shiftHour precision
         final shiftLevel = EdtfTime.shiftLevelHour;
         return EdtfTime(hour, minutes, seconds, shiftLevel, shiftHour);
       } else {
         // Has shiftHour:shiftMinute format
-        final shiftMinute = int.parse(shiftTime[1]);
+        final shiftMinute = int.parse(parts[3]);
         final shiftLevel = EdtfTime.shiftLevelMinute;
         return EdtfTime(
             hour, minutes, seconds, shiftLevel, shiftHour, shiftMinute);
@@ -389,6 +388,7 @@ class EdtfTime {
       return ret;
     } else if (shiftLevel == shiftLevelMinute) {
       ret += _toFixedString(_shiftHour, 2, plusSign: true);
+      ret += ':';
       ret += _toFixedString(_shiftMinute, 2);
       return ret;
     } else {
