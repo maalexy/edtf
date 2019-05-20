@@ -3,15 +3,8 @@ import 'package:test/test.dart';
 
 void main() {
   group('A group of tests', () {
-    Awesome awesome;
-
-    setUp(() {
-      awesome = Awesome();
-    });
-
-    test('First Test', () {
-      expect(awesome.isAwesome, isTrue);
-    });
+//    setUp(() {
+//    });
     test('Date parse test', () {
       ///                      Y-12019-%05-26~T15:34:06Z
       final dateParse = Edtf.parse('Y-12019-?05-26~T15:34:06Z');
