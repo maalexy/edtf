@@ -432,14 +432,20 @@ class EdtfNumber {
   /// True if the number has '?' or '%' characters, stating it is uncertain
   final bool localUncert;
 
-  /// True if the number is approximate because of a group qualifier.
+  /// True if the number is approximate because of a group qualifier
   final bool groupApprox;
 
-  /// True if the number is uncertain because of a group qualifier.
+  /// True if the number is uncertain because of a group qualifier
   final bool groupUncert;
 
-  /// The real value of the number, shifted according to the exponent.
-  get realValue => value * pow(10, exp);
+  /// The real value of the number, shifted according to the exponent
+  int get realValue => value * pow(10, exp).toInt();
+
+  /// True if the number is an approximation
+  bool get approx => localApprox | groupApprox;
+  /// True if the number is uncertain
+  bool get uncert => localUncert | groupUncert;
+
 
   // TODO replace like modifier constructor
   EdtfNumber._(
@@ -493,17 +499,17 @@ class EdtfNumber {
   @override
   String toString() {
     var ret = '';
-    if (value < -9999 || 9999 < value) ret += 'Y';
+    if (value < -9999 || 9999 < value || exp != null) ret += 'Y';
     ret += unspecMask.replaceAll('.', 'X');
     if (exp != null) ret += 'E' + exp.toString();
     if (significance != null) ret += 'S' + significance.toString();
-    final groupchar = groupApprox ? groupUncert ? '%' : '~' : '?';
+    final groupChar = groupApprox ? groupUncert ? '%' : '~' : '?';
     if ((localApprox && groupApprox) || (localUncert && groupUncert)) {
-      ret += groupchar;
+      ret += groupChar;
     }
-    final localchar = localApprox ? localUncert ? '%' : '~' : '?';
+    final localChar = localApprox ? localUncert ? '%' : '~' : '?';
     if ((localApprox && !groupApprox) || (localUncert && !groupUncert)) {
-      ret = localchar + ret;
+      ret = localChar + ret;
     }
     return ret;
   }
