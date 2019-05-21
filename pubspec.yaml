@@ -7,7 +7,8 @@ author: Alexy Marcell <alexy.marcel@hotmail.com>
 environment:
   sdk: '>=2.1.0 <3.0.0'
 
-#dependencies:
+dependencies:
+  meta: ^1.0.0
 #  path: ^1.4.1
 
 dev_dependencies:
