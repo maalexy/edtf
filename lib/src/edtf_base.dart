@@ -121,7 +121,8 @@ class EdtfInterval extends Edtf {
   final bool openEnd;
 
   /// Creates an object with the given parameters
-  EdtfInterval._(this.start, this.openStart, this.end, this.openEnd) : super._();
+  EdtfInterval._(this.start, this.openStart, this.end, this.openEnd)
+      : super._();
 
   /// Parses a '?/?' like string to an interval
   factory EdtfInterval.parse(String s) {
