@@ -72,12 +72,12 @@ abstract class EdtfSet extends Edtf {
 /// from a set.
 class EdtfEvery extends EdtfSet {
   /// Constructor for directly creating an object with the given values
-  EdtfEvery(List<Edtf> values) : super._(values);
+  EdtfEvery._(List<Edtf> values) : super._(values);
   static final _regExp = RegExp('^{(.*)}\$');
 
   /// Parse a '{...}' like string to an EdtfEvery object
   factory EdtfEvery.parse(String s) {
-    return EdtfEvery(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
+    return EdtfEvery._(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 
   @override
@@ -90,12 +90,12 @@ class EdtfEvery extends EdtfSet {
 /// from a set
 class EdtfOneOf extends EdtfSet {
   /// Constructor for directly creating an object with the given values
-  EdtfOneOf(List<Edtf> values) : super._(values);
+  EdtfOneOf._(List<Edtf> values) : super._(values);
 
   /// Parses a '[...]' like string to an EdtfOneOf object
   factory EdtfOneOf.parse(String s) {
     final _regExp = RegExp('^\\[(.*)\\]\$');
-    return EdtfOneOf(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
+    return EdtfOneOf._(EdtfSet._parseDates(_regExp.firstMatch(s).group(1)));
   }
 
   @override
@@ -121,7 +121,7 @@ class EdtfInterval extends Edtf {
   final bool openEnd;
 
   /// Creates an object with the given parameters
-  EdtfInterval(this.start, this.openStart, this.end, this.openEnd) : super._();
+  EdtfInterval._(this.start, this.openStart, this.end, this.openEnd) : super._();
 
   /// Parses a '?/?' like string to an interval
   factory EdtfInterval.parse(String s) {
@@ -149,7 +149,7 @@ class EdtfInterval extends Edtf {
       end = EdtfDate.parse(dates[1]);
       openEnd = false;
     }
-    return EdtfInterval(start, openStart, end, openEnd);
+    return EdtfInterval._(start, openStart, end, openEnd);
   }
 
   /// Parses a '?..?' like string to an interval
@@ -172,7 +172,7 @@ class EdtfInterval extends Edtf {
       end = EdtfDate.parse(dates[1]);
       openEnd = false;
     }
-    return EdtfInterval(start, openStart, end, openEnd);
+    return EdtfInterval._(start, openStart, end, openEnd);
   }
 
   @override
@@ -223,7 +223,7 @@ class EdtfDate extends Edtf {
   final EdtfTime time;
 
   /// Constructs a EdtfDate objects from the given parameters
-  EdtfDate(this.year, [this.month, this.day, this.time]) : super._();
+  EdtfDate._(this.year, [this.month, this.day, this.time]) : super._();
 
   /// Parses a date according to edtf specification.
   factory EdtfDate.parse(String s) {
@@ -254,7 +254,7 @@ class EdtfDate extends Edtf {
       month = EdtfNumber._addGroup(month, day);
       year = EdtfNumber._addGroup(year, day);
     }
-    return EdtfDate(year, month, day, etime);
+    return EdtfDate._(year, month, day, etime);
   }
 
   @override
@@ -329,7 +329,7 @@ class EdtfTime {
   static const shiftLevelMinute = 3;
 
   /// Constructor for creating an object from the given values
-  EdtfTime(this.hour, this.minutes, this.seconds, this.shiftLevel,
+  EdtfTime._(this.hour, this.minutes, this.seconds, this.shiftLevel,
       [this._shiftHour, this._shiftMinute]);
 
   /// Creates an EdtfTime object from a 'XX:XX:XX' + shift? like string
@@ -341,23 +341,23 @@ class EdtfTime {
     if (parts[2].length <= 2) {
       // Local time
       final shiftLevel = EdtfTime.shiftLevelLocal;
-      return EdtfTime(hour, minutes, seconds, shiftLevel);
+      return EdtfTime._(hour, minutes, seconds, shiftLevel);
     } else if (parts[2][2] == 'Z') {
       // UTC time
       final shiftLevel = EdtfTime.shiftLevelUTC;
-      return EdtfTime(hour, minutes, seconds, shiftLevel);
+      return EdtfTime._(hour, minutes, seconds, shiftLevel);
     } else {
       // Shift is added
       final shiftHour = int.parse(parts[2].substring(2));
       if (parts.length <= 3) {
         // Has shiftHour precision
         final shiftLevel = EdtfTime.shiftLevelHour;
-        return EdtfTime(hour, minutes, seconds, shiftLevel, shiftHour);
+        return EdtfTime._(hour, minutes, seconds, shiftLevel, shiftHour);
       } else {
         // Has shiftHour:shiftMinute format
         final shiftMinute = int.parse(parts[3]);
         final shiftLevel = EdtfTime.shiftLevelMinute;
-        return EdtfTime(
+        return EdtfTime._(
             hour, minutes, seconds, shiftLevel, shiftHour, shiftMinute);
       }
     }

@@ -1,6 +1,6 @@
 name: edtf
 description: A library for parsing dates using the EDTF standard.
-version: 1.0.0
+version: 2.0.0
 homepage: https://github.com/maalexy/edtf
 author: Alexy Marcell <alexy.marcel@hotmail.com>
 
